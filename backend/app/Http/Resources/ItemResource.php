@@ -17,7 +17,7 @@ class ItemResource extends JsonResource
             'image_url' => $this->image_url ? Storage::disk('public')->url($this->image_url) : null,
             'starting_price' => $this->starting_price,
             'current_price' => $this->current_price,
-            'ends_at' => $this->ends_at,
+            'ends_at' => $this->ends_at?->toIso8601String(),
             'status' => $this->status,
             'seller' => $this->whenLoaded('seller', fn () => [
                 'id' => $this->seller->id,
