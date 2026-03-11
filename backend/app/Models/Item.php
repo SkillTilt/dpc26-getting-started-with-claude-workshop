@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -100,6 +101,16 @@ class Item extends Model
     {
         return $query->where('ends_at', '>', now())
             ->where('ends_at', '<=', now()->addHours($hours));
+    }
+
+    /**
+     * Scope a query to only include active items expiring within the next hour.
+     */
+    public function scopeExpiringSoon(Builder $query): Builder
+    {
+        return $query->active()
+            ->where('ends_at', '>', Carbon::now())
+            ->where('ends_at', '<=', Carbon::now()->addHour());
     }
 
     /**

@@ -48,6 +48,7 @@ This is a workshop demo app with **intentional bugs and improvements** tracked a
 - All request validation uses Form Requests (`App\Http\Requests\*`) — never validate inline in controllers
 - Route names use dot notation (`category.items`) — not camelCase
 - Follow PSR-12 coding style; Laravel Pint is configured for formatting
+- Reuse existing Eloquent scopes when composing new scopes or queries — never duplicate a scope's logic inline (e.g., use `->active()` instead of repeating `->where('status', 'active')`)
 
 ### Backend API
 
