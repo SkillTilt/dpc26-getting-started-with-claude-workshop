@@ -12,9 +12,7 @@ onMounted(() => {
 onUnmounted(() => clearInterval(interval))
 
 const timeLeft = computed(() => {
-  // BUG: endsAt is UTC from the server, but new Date() parses it as local
-  // if the string lacks a Z or timezone offset
-  const end = new Date(props.endsAt)    // ← no timezone handling
+  const end = new Date(props.endsAt)
   const diff = end - now.value
   if (diff <= 0) return 'Ended'
   const hours = Math.floor(diff / 3600000)
