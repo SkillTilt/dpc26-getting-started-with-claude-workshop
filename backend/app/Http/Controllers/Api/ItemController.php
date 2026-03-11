@@ -7,9 +7,28 @@ use App\Http\Requests\StoreItemRequest;
 use App\Http\Resources\ItemResource;
 use App\Models\Item;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ItemController extends Controller
 {
+    /**
+     * List items, optionally filtered.
+     */
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        $query = Item::query()
+            ->active()
+            ->withCount('bids')
+            ->with('seller');
+
+        if ($request->query('filter') === 'ending_soon') {
+            $query->endingSoon(24)->orderBy('ends_at', 'asc');
+        }
+
+        return ItemResource::collection($query->get());
+    }
+
     /**
      * Display a single item with its relationships.
      */

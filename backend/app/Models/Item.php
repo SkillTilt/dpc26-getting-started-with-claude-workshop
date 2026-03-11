@@ -96,10 +96,10 @@ class Item extends Model
     /**
      * Scope a query to only include items ending within the next 6 hours.
      */
-    public function scopeEndingSoon(Builder $query): Builder
+    public function scopeEndingSoon(Builder $query, int $hours = 6): Builder
     {
         return $query->where('ends_at', '>', now())
-            ->where('ends_at', '<=', now()->addHours(6));
+            ->where('ends_at', '<=', now()->addHours($hours));
     }
 
     /**

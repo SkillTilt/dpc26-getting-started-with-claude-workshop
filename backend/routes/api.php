@@ -16,6 +16,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category:slug}/items', [CategoryController::class, 'items'])
     ->name('categoryItems');
+Route::get('/items', [ItemController::class, 'index']);
 Route::get('/items/{item}', [ItemController::class, 'show']);
 
 // Authenticated
