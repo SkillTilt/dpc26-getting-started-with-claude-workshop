@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 BidBoard is a real-time auction platform with a decoupled architecture:
 - **Backend:** Laravel 12 API + Filament v3 admin panel (`backend/`)
 - **Frontend:** Vue 3 SPA with Composition API (`frontend/`)
-- **Database:** SQLite
+- **Database:** MySQL 8.0 (Docker container, persistent volume)
 - **Infrastructure:** Docker Compose (two containers: `app` on port 80, `frontend` on port 3000)
 
 This is a workshop demo app with **intentional bugs and improvements** tracked as GitHub issues.
