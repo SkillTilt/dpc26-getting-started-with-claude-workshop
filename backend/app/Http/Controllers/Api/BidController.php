@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\BidPlaced;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PlaceBidRequest;
 use App\Http\Resources\BidResource;
@@ -33,15 +34,13 @@ class BidController extends Controller
         $item->current_price = $amount;
         $item->save();
 
-        // log that the previous high bidder should be notified
+        // find the previous high bidder and dispatch the outbid event
         $previousHighBid = $item->bids()
             ->where('id', '!=', $bid->id)
             ->orderBy('amount', 'desc')
             ->first();
 
-        if ($previousHighBid) {
-            Log::info("User {$item->bids()->latest()->first()->user->name} should be notified they were outbid");
-        }
+        BidPlaced::dispatch($bid, $previousHighBid?->user);
 
         // check if the auction should auto-close
         // (e.g. if someone set a "buy now" threshold or time is about to expire)
