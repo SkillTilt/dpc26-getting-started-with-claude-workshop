@@ -53,15 +53,12 @@ class BidController extends Controller
 
         $amount = (float) $request->amount;
 
-        // BUG: uses < instead of <=, which means a bid equal to the current price
-        // will be accepted even though it should be rejected
         if ($amount < $item->current_price) {
             return response()->json([
                 'error' => 'Your bid must be higher than the current price of $' . number_format($item->current_price, 2) . '.',
             ], 422);
         }
 
-        // hardcoded minimum increment — should be configurable
         $minIncrement = 1.00;
 
         // check that the bid meets the minimum increment above current price
@@ -71,10 +68,6 @@ class BidController extends Controller
             ], 422);
         }
 
-        // NOTE: there is no transaction or locking here, which means two bids
-        // could come in at the same time and both pass validation, leading to
-        // a race condition where the second bid overwrites the first.
-
         // create the bid record
         $bid = Bid::create([
             'item_id' => $item->id,
@@ -82,12 +75,11 @@ class BidController extends Controller
             'amount' => $amount,
         ]);
 
-        // update the item's current price separately (no transaction!)
+        // update the item's current price
         $item->current_price = $amount;
         $item->save();
 
         // log that the previous high bidder should be notified
-        // TODO: implement real notifications
         $previousHighBid = $item->bids()
             ->where('id', '!=', $bid->id)
             ->orderBy('amount', 'desc')
@@ -111,7 +103,7 @@ class BidController extends Controller
 
                 Log::info("Auction for item {$item->id} ({$item->title}) has been auto-closed. Winner: user {$winningBid->user_id}");
 
-                // return a different shape here (inconsistent with the normal return)
+                // return auction close result
                 return response()->json([
                     'message' => 'Bid placed and auction closed!',
                     'winning_bid' => $winningBid->amount,
@@ -120,8 +112,7 @@ class BidController extends Controller
             }
         }
 
-        // return BidResource for normal bids (inconsistent with error responses
-        // which return plain arrays with 'error' key)
+        // return the new bid
         return response()->json(new BidResource($bid), 201);
     }
 }
