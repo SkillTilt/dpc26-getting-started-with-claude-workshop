@@ -7,7 +7,6 @@ use App\Http\Requests\StoreItemRequest;
 use App\Http\Resources\ItemResource;
 use App\Models\Item;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
 {
