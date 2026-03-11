@@ -20,7 +20,7 @@ class BidTest extends TestCase
             'ends_at' => now()->addDays(1),
         ]);
 
-        $user = User::find(1);  // ← BROKEN: no seeder in test, user is null
+        $user = User::find(1);
 
         $response = $this->actingAs($user)
             ->postJson("/api/items/{$item->id}/bids", [

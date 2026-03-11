@@ -83,6 +83,12 @@ Five tables: users, categories, items (with seller_id, winner_id, status enum), 
 - **BidTest intentionally fails** — references `User::find(1)` without seeding (this is a workshop exercise)
 - Expected: 17 pass, 1 fail
 
+## Test Accounts
+
+All accounts use password: `password`
+- alice@example.com, bob@example.com, charlie@example.com, diana@example.com, eve@example.com
+
+
 ## Gotchas
 
 - The `CategoryController@items` method returns raw arrays instead of ItemResource —
