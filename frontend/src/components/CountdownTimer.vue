@@ -12,7 +12,8 @@ onMounted(() => {
 onUnmounted(() => clearInterval(interval))
 
 const timeLeft = computed(() => {
-  const end = new Date(props.endsAt)
+  const raw = props.endsAt
+  const end = new Date(raw.includes('T') || raw.includes('Z') ? raw : raw + 'Z')
   const diff = end - now.value
   if (diff <= 0) return 'Ended'
   const hours = Math.floor(diff / 3600000)
