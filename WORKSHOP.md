@@ -74,6 +74,22 @@ sudo usermod -aG docker $USER
   ```
 - If using PowerShell or CMD instead of WSL, the Docker commands are the same but file system performance may be slower.
 
+## Test Accounts
+
+The seeder creates 5 users. All passwords are `password`.
+
+| Name          | Email               | Role    |
+|---------------|---------------------|---------|
+| Alice Mercer  | alice@example.com   | Seller  |
+| Bob Tanaka    | bob@example.com     | Seller  |
+| Clara Voss    | clara@example.com   | Seller  |
+| Dave Park     | dave@example.com    | Seller  |
+| Eve Santos    | eve@example.com     | Buyer   |
+
+**Frontend:** Log in at [http://localhost:3000/login](http://localhost:3000/login) with any of the above credentials.
+
+**Admin panel:** Open [http://localhost:80/admin](http://localhost:80/admin) and log in with any user's credentials. All users have admin access.
+
 ## Resetting the Application
 
 To start fresh at any time:
