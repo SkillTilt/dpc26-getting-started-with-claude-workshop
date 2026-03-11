@@ -1,0 +1,49 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose exec app php artisan test*)",
+      "Bash(docker compose exec app php artisan *)",
+      "Bash(docker compose exec app ./vendor/bin/pint*)",
+      "Bash(docker compose exec app ./vendor/bin/phpstan*)",
+      "Bash(docker compose exec app composer *)",
+      "Bash(docker compose logs*)",
+      "Bash(docker compose ps*)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(docker compose down*)",
+      "Bash(git push --force*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if grep -qE 'migrate:fresh|db:wipe'; then echo 'BLOCKED: migrate:fresh and db:wipe destroy all data. Use migrate (without :fresh) for safe migrations, or ask the user explicitly if a full reset is intended.' >&2; exit 2; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "docker compose exec app ./vendor/bin/pint 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty'); if echo \"$FILE\" | grep -qE '(Models|Controllers)/'; then BASENAME=$(basename \"$FILE\" .php); docker compose exec app php artisan test --filter=\"$BASENAME\" 2>&1 | tail -20; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

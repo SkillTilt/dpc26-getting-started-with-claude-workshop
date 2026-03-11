@@ -24,6 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/items', [ItemController::class, 'store']);
     Route::get('/user/listings', [UserController::class, 'listings'])
         ->name('user.listings');    // dot notation — correct
+    Route::get('/user/wins', [UserController::class, 'wins'])
+        ->name('user.wins');
     Route::get('/user/bids', [UserController::class, 'bids'])
         ->name('userBids');         // camelCase — intentionally inconsistent
     Route::get('/user', [UserController::class, 'show']);

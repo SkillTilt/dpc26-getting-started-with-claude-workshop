@@ -94,6 +94,23 @@ class Item extends Model
     }
 
     /**
+     * Scope a query to only include items ending within the next 6 hours.
+     */
+    public function scopeEndingSoon(Builder $query): Builder
+    {
+        return $query->where('ends_at', '>', now())
+            ->where('ends_at', '<=', now()->addHours(6));
+    }
+
+    /**
+     * Get the current price formatted as a dollar string.
+     */
+    public function formattedPrice(): string
+    {
+        return '$' . number_format((float) $this->current_price, 2);
+    }
+
+    /**
      * Determine if the item's auction has ended.
      */
     public function getIsEndedAttribute(): bool

@@ -48,6 +48,22 @@ class UserController extends Controller
     }
 
     /**
+     * Get the items the authenticated user has won.
+     */
+    public function wins(): JsonResponse
+    {
+        $user = auth()->user();
+
+        $wins = ItemResource::collection(
+            $user->wonItems()->where('status', 'closed')->get()
+        );
+
+        return response()->json([
+            'data' => $wins,
+        ]);
+    }
+
+    /**
      * Get the authenticated user's bids grouped by status.
      */
     public function bids(): JsonResponse
