@@ -8,7 +8,7 @@ BidBoard is a real-time auction platform with a Laravel 12 API backend and Vue 3
 
 ## Architecture
 
-- **Backend** (`/backend`): Laravel 12 (PHP 8.4), SQLite database, Sanctum token auth, Filament v3 admin panel at `/admin`
+- **Backend** (`/backend`): Laravel 12 (PHP 8.4), MySQL 8.0 database, Sanctum token auth, Filament v3 admin panel at `/admin`
 - **Frontend** (`/frontend`): Vue 3 (Composition API), Vite 7, Tailwind CSS v4, Axios for API calls
 - **API proxy**: Frontend dev server (port 3000) proxies `/api/*` requests to Laravel backend (port 80) via Vite config
 
