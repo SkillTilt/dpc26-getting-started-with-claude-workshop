@@ -28,8 +28,6 @@ class CategoryController extends Controller
     {
         $status = $request->query('status', 'active');
 
-        // N+1 bug: items are loaded without eager loading bids or seller,
-        // but we access $item->bids and $item->seller inside the map closure.
         $items = $category->items()->where('status', $status)->paginate(12);
 
         $items->through(function ($item) {
