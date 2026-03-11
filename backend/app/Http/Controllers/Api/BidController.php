@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PlaceBidRequest;
 use App\Http\Resources\BidResource;
 use App\Models\Bid;
 use App\Models\Item;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class BidController extends Controller
@@ -15,58 +15,12 @@ class BidController extends Controller
     /**
      * Place a bid on an item.
      *
-     * This handles all the bid validation, placement, and post-bid logic
+     * This handles bid placement and post-bid logic
      * including checking if the auction should auto-close.
      */
-    public function store(Request $request, int $itemId): JsonResponse
+    public function store(PlaceBidRequest $request, Item $item): JsonResponse
     {
-        // manually look up the item instead of using route model binding
-        $item = Item::findOrFail($itemId);
-
-        // check that the auction is still active
-        if ($item->status !== 'active') {
-            return response()->json([
-                'error' => 'This auction is no longer active.',
-            ], 422);
-        }
-
-        // check if the auction has expired
-        if ($item->ends_at < now()) {
-            return response()->json([
-                'error' => 'This auction has already ended.',
-            ], 422);
-        }
-
-        // make sure the seller can't bid on their own item
-        if ($item->seller_id === auth()->id()) {
-            return response()->json([
-                'error' => 'You cannot bid on your own item.',
-            ], 403);
-        }
-
-        // validate the bid amount is present
-        if (! $request->has('amount') || ! is_numeric($request->amount)) {
-            return response()->json([
-                'error' => 'A valid bid amount is required.',
-            ], 422);
-        }
-
-        $amount = (float) $request->amount;
-
-        if ($amount < $item->current_price) {
-            return response()->json([
-                'error' => 'Your bid must be higher than the current price of $' . number_format($item->current_price, 2) . '.',
-            ], 422);
-        }
-
-        $minIncrement = 1.00;
-
-        // check that the bid meets the minimum increment above current price
-        if ($amount < ($item->current_price + $minIncrement)) {
-            return response()->json([
-                'error' => 'Bid must be at least $' . number_format($minIncrement, 2) . ' more than the current price.',
-            ], 422);
-        }
+        $amount = (float) $request->validated('amount');
 
         // create the bid record
         $bid = Bid::create([
