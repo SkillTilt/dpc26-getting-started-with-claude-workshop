@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CategoryItemsRequest;
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\ItemResource;
 use App\Models\Category;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class CategoryController extends Controller
 {
@@ -22,27 +22,17 @@ class CategoryController extends Controller
     }
 
     /**
-     * Get items for a specific category, filtered by status.
+     * Get active items for a specific category, paginated and sorted by ending soonest.
      */
-    public function items(Category $category, Request $request): JsonResponse
+    public function items(Category $category, CategoryItemsRequest $request): AnonymousResourceCollection
     {
-        $status = $request->query('status', 'active');
+        $items = $category->items()
+            ->active()
+            ->withCount('bids')
+            ->with('seller')
+            ->orderBy('ends_at')
+            ->paginate(12);
 
-        $items = $category->items()->where('status', $status)->paginate(12);
-
-        $items->through(function ($item) {
-            return [
-                'id' => $item->id,
-                'title' => $item->title,
-                'description' => $item->description,
-                'image_url' => $item->image_url ? Storage::disk('public')->url($item->image_url) : null,
-                'current_price' => $item->current_price,
-                'bids_count' => $item->bids->count(),
-                'seller_name' => $item->seller->name,
-                'ends_at' => $item->ends_at,
-            ];
-        });
-
-        return response()->json($items);
+        return ItemResource::collection($items);
     }
 }
