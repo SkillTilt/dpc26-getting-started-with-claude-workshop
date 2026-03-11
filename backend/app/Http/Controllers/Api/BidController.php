@@ -42,6 +42,12 @@ class BidController extends Controller
 
         BidPlaced::dispatch($bid, $previousHighBid?->user);
 
+        // snipe protection: extend auction if bid placed within last 30 seconds
+        if ($item->ends_at->diffInSeconds(now(), false) >= -30) {
+            $item->ends_at = now()->addMinutes(2);
+            $item->save();
+        }
+
         // check if the auction should auto-close
         // (e.g. if someone set a "buy now" threshold or time is about to expire)
         if ($item->ends_at <= now()->addMinutes(1)) {
