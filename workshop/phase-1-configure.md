@@ -1,226 +1,484 @@
-# Phase 1: Configure — Demo Outline
+# Phase 1: Configure — Demo & Code-Along Script
 
 **Narrative arc:** "You just inherited BidBoard — a Laravel auction platform. You don't know the codebase. Claude doesn't either. Before you write a single line of code, you teach Claude about the project. Everything you invest here pays dividends in every phase that follows."
 
-**Total time estimate:** ~45 minutes
+**Repository:** https://github.com/SkillTilt/dpc26-getting-started-with-claude-workshop
 
----
+**Prerequisites:** BidBoard is running via Docker Compose (`docker compose up -d`), database is seeded, frontend is at `http://localhost:3000`, backend API at `http://localhost:80`.
 
-## Demo 1 — CLAUDE.md Setup
+## Demo 1 — CLAUDE.md: From Stranger to Teammate
 
-**What we show:** CLAUDE.md is the onboarding document for an agent that starts fresh every session. Writing one from scratch turns Claude from a talented stranger into an informed teammate.
+### Setup
 
-**The BidBoard scenario:** BidBoard has no CLAUDE.md. Attendees open the project in Claude Code and run `/init`. Claude explores the codebase and produces a baseline. Then we improve it manually — because Claude gets the obvious stuff right but misses what only a human who knows the project would know.
+Open a terminal in the BidBoard project root (the directory containing `docker-compose.yml`, `backend/`, `frontend/`).
 
-**Key moments:**
+```bash
+cd demo-repo
+claude
+```
 
-- Run `/init` and watch Claude scan the project — it detects Laravel, Filament, Vue, Tailwind, Composer, PHPUnit
-- Open the generated CLAUDE.md — point out what it got right (stack, structure, main commands) and what it missed (domain rules, conventions, gotchas)
-- Add the missing sections manually:
-  - Stack details: Laravel + Filament admin, Vue 3 + Tailwind frontend, SQLite for local dev
-  - Conventions: Composition API (not Options API), Form Requests for validation, API Resources for responses, PSR-4 autoloading
-  - Package manager: Composer
-  - Test runner: PHPUnit (`./vendor/bin/phpunit`)
-  - Formatter: Laravel Pint (`./vendor/bin/pint`)
-  - Static analysis: PHPStan (`./vendor/bin/phpstan`)
-  - Domain rules: money stored as integers (cents), dates in UTC, bids are never deleted
-- Before/after comparison: give Claude a prompt like "Add an API endpoint for placing a bid" — without CLAUDE.md it returns raw arrays and inline validation; with CLAUDE.md it uses Form Requests and API Resources from the start
+### Step 1 — Run /init
 
-**Approximate time:** 8 minutes
+```
+/init
+```
 
----
+**After it finishes,** a new file was added in your project root `CLAUDE.md`, open it and inspect it:
 
-## Demo 2 — CLAUDE.md Gotchas
+- Claude probably detected: stack detection (Laravel, Vue, Tailwind), main commands (`docker compose exec app php artisan test`), project structure
+- What it might have *missed* — and this is the key part:
+  - It doesn't know that the Vue frontend uses Composition API exclusively (one page breaks this — but Claude doesn't know it's a convention)
+  - It doesn't know that API responses must use API Resources, not raw arrays
+  - It doesn't know that validation should live in Form Requests, not inline in controllers
+  - It doesn't know any domain rules about auctions — bid integrity, monetary precision, status transitions
 
-**What we show:** The gotchas section is where project-specific knowledge lives — the things a new developer would get wrong on their first day. These are the highest-leverage lines in the entire CLAUDE.md.
+> "Claude got the easy stuff right. The stuff any developer could figure out from the file structure. But the things that make a team consistent — conventions, domain rules, gotchas — those only come from humans who know the project."
 
-**The BidBoard scenario:** BidBoard has real traps. Money is in cents but the database column is called `price` (not `price_cents`). Bids must never be deleted. The Vue frontend uses Composition API exclusively. Filament resources live in a non-obvious directory. These are exactly the kind of things Claude will get wrong without explicit instruction.
+### Step 2 - Manually improve the CLAUDE.md
 
-**Key moments:**
+Exit the session (`/exit`) and edit CLAUDE.md. 
 
-- Add gotchas one at a time, explaining why each one matters:
-  - "Never delete bids — only soft-delete items" (data integrity for auction history)
-  - "All monetary values are integers representing cents" (avoids floating-point rounding in auction math)
-  - "Vue components use Composition API with `<script setup>`, never Options API" (consistency across the frontend)
-  - "Filament resources live in `app/Filament/Resources/`" (Claude tends to look in the wrong place)
-  - "API responses must use API Resources (`App\Http\Resources\`), never return raw arrays or models" (contract stability)
-- Show what happens when Claude violates one: prompt "Show me how to display a bid amount in the Vue frontend" — without the gotcha it uses `bid.price` as dollars; with it, it divides by 100 and formats correctly
-- The takeaway: gotchas are cheaper to write than bugs are to fix
+Replace the tech stack and commands section with:
+```markdown 
+## Stack
 
-**Approximate time:** 5 minutes
+- **Backend:** Laravel 12, PHP 8.4, SQLite, Laravel Sanctum (API auth), Filament v3 (admin panel)
+- **Frontend:** Vue 3 (Composition API), Vue Router, Axios, Tailwind CSS v4, Vite
+- **Infrastructure:** Docker Compose (PHP dev server on port 80, Node dev server on port 3000)
 
----
+## Commands
 
-## Demo 3 — Permissions Setup
+### Backend (run from `backend/`)
 
-**What we show:** Permission rules eliminate the "allow/deny" prompt fatigue for safe commands while keeping guardrails on dangerous ones. This is committed to git — the whole team gets the same boundaries.
+- **Setup (Install deps, copy .env, generate key, run migrations):** `docker compose exec app composer setup`
+- **Start Dev (Start dev server + queue worker + logs (concurrent):** `docker compose exec app composer dev`
+- **Run backend tests:** `docker compose exec app php artisan test`
+- **Run single test:** `docker compose exec app php artisan test --filter=TestName`
+- **Format PHP code:** `docker compose exec app ./vendor/bin/pint`
+- **Static analysis:** `docker compose exec app ./vendor/bin/phpstan analyse`
+- **Create storage symlink:** `docker compose exec app php artisan storage:link`
+- **Run migrations:** `docker compose exec app php artisan migrate`
+- **Seed database:** `docker compose exec app php artisan migrate:fresh --seed`
+- **Clear caches:** `docker compose exec app php artisan optimize:clear`
 
-**The BidBoard scenario:** Claude will need to run PHPUnit, Pint, PHPStan, and Artisan commands constantly while working on BidBoard. Without permissions configured, every single invocation triggers a confirmation prompt.
+### Frontend (run from `frontend/`)
 
-**Key moments:**
+- **Install dependencies:** `docker compose exec frontend npm install`
+- **Vite dev server:** `docker compose exec frontend npm run dev`
+- **Production build:** `docker compose exec frontend npm run build`
+```
 
-- Start without permissions — ask Claude to "run the test suite and fix any failures." Count the permission prompts (there will be several)
-- Create `.claude/settings.json` with allow rules:
-  - `./vendor/bin/phpunit *`
-  - `./vendor/bin/pint *`
-  - `./vendor/bin/phpstan *`
-  - `php artisan *`
-- Run the same prompt again — zero interruptions on allowed commands
-- Point out that this file is committed to version control — next developer who clones BidBoard gets the same setup on day one
-- Mention the deny list exists too (we will use it in demo 6)
+Add add following sections:
 
-**Approximate time:** 4 minutes
+```markdown
+## Conventions
 
----
+- All Vue components use Composition API with `<script setup>` — never Options API
+- All API responses use API Resources (`App\Http\Resources\*`) — never return raw arrays or models
+- All request validation uses Form Requests (`App\Http\Requests\*`) — never validate inline in controllers
+- Route names use dot notation (`category.items`) — not camelCase
+- Follow PSR-12 coding style; Laravel Pint is configured for formatting
 
-## Demo 4 — Auto-Memory
+## Domain Rules
 
-**What we show:** Beyond CLAUDE.md (what you teach deliberately), Claude also learns from sessions automatically. Auto-memory captures patterns Claude discovers while working, so future sessions start smarter.
+- Monetary values are stored as decimal(10,2) in the database
+- Bids are never deleted — they are the audit trail for an auction
+- An auction can be active, closed, or cancelled — status transitions are one-way
+- Only the seller can cancel an auction; the system closes auctions when they expire
+- A user cannot bid on their own item
+```
 
-**The BidBoard scenario:** During a session, Claude encounters the cents-based money pattern in the codebase. It makes a mistake (displays raw cents as dollars), gets corrected, and that correction gets stored in memory. Next session, it knows without being told.
+### Step 3 — Verify
 
-**Key moments:**
+Start a new session:
 
-- In a session, prompt Claude with something that exposes the money pattern — e.g., "Add a helper that formats a bid amount for display"
-- Claude gets it wrong (uses the raw integer as dollars)
-- Correct it: "That's cents, not dollars. Divide by 100 and format as currency."
-- Claude fixes it and stores the learning
-- Show the memory: `/memory` to see what Claude retained
-- Start a new session and ask a similar question — Claude gets it right this time without being told
-- Explain the relationship: CLAUDE.md is for rules you control and enforce; auto-memory is for patterns Claude picks up organically. Critical rules belong in CLAUDE.md because you cannot rely on auto-memory for correctness guarantees
+```bash
+claude
+```
 
-**Approximate time:** 5 minutes
+Ask claude a question about the conventions or domain rules:
 
----
+```
+Can we use camelCase in route names?
+```
 
-## Demo 5 — Hook: Auto-Format on Save
+## Demo 2 — CLAUDE.md Gotchas: The Highest-Leverage Lines
 
-**What we show:** Hooks let you run commands automatically when Claude performs certain actions. A PostToolUse hook on file writes ensures every file Claude touches is formatted before you even see it.
+Gotchas capture the mistakes a new developer (or Claude) would make on day one. These are the highest-leverage lines in the entire CLAUDE.md.
 
-**The BidBoard scenario:** Claude writes a new controller method in BidBoard. The code works but has minor formatting inconsistencies that would fail Laravel Pint. Instead of catching this in review, the hook runs Pint automatically after every file write.
+### Step 1 — Add gotchas to CLAUDE.md
 
-**Key moments:**
+Open CLAUDE.md and add:
 
-- First, show the problem: ask Claude to "Add a method to the ItemController that returns paginated items with their current highest bid." The code works but has formatting issues. Run `./vendor/bin/pint --test` — it reports violations.
-- Add the PostToolUse hook to `.claude/settings.json`:
-  - Matcher: `Write|Edit`
-  - Command: `./vendor/bin/pint --dirty || true`
-- Run the same prompt again
-- Show that after every file write, Pint fires automatically in the background
-- Open the file — it is perfectly formatted. Run `./vendor/bin/pint --test` — clean
-- Explain the `|| true`: the hook should never block Claude. If Pint errors on a syntax issue, Claude should still proceed. The goal is improvement, not interruption
+```markdown
+## Gotchas
 
-**Approximate time:** 5 minutes
+- The `CategoryController@items` method returns raw arrays instead of ItemResource —
+  this is a known tech debt item, do NOT copy this pattern in new code
+- `CategoryPage.vue` uses Options API — this is a style inconsistency, not the standard.
+  All new Vue code must use Composition API with `<script setup>`
+- The `BidController@store` method is a "fat controller" with ~120 lines of inline logic —
+  do not add more logic to it. Any new bid-related logic should go in a service class
+- Filament admin resources live in `app/Filament/Resources/` — do not confuse with
+  API Resources in `app/Http/Resources/`
+- `UserController@listings` uses `DB::select()` with raw SQL for sold items — this is
+  inconsistent with the Eloquent approach used for active listings. New endpoints should
+  use Eloquent with API Resources
+- The test suite has one intentionally broken test (`BidTest`) — don't "fix" it by
+  working around the root cause
+```
 
----
+### Step 2 — Demonstrate a gotcha in action
 
-## Demo 6 — Hook: Block Dangerous Commands
+```bash
+claude
+```
 
-**What we show:** PreToolUse hooks can intercept and block commands before they execute. This is your safety net for destructive operations that should never run without explicit human intent.
+Prompt:
 
-**The BidBoard scenario:** BidBoard uses SQLite with seed data (categories, sample items, users). Running `php artisan migrate:fresh` or `php artisan db:wipe` would destroy everything and require a full reseed. These commands should be blocked.
+```
+I need to add a new API endpoint that returns the items a user has won (closed auctions
+where they're the winner). Look at the existing UserController for patterns to follow.
+```
 
-**Key moments:**
+**What you will notice:**
 
-- Add a PreToolUse hook to `.claude/settings.json`:
-  - Matcher: `Bash`
-  - Command: a script that checks `$CLAUDE_TOOL_INPUT` for `migrate:fresh` or `db:wipe` — if found, prints a block message and exits with code 1
-- Prompt Claude with something that might trigger it: "The database schema seems out of date. Reset it and start fresh."
-- Claude attempts `php artisan migrate:fresh` — the hook intercepts it
-- Claude receives the block message, explains what happened, and asks for guidance instead of silently destroying data
-- Point out: Claude does not just fail. It receives the block message and can reason about it. Write hooks that explain *why* something was blocked — Claude will surface that explanation to you
+- Claude will see the raw DB query in `UserController@listings` (the `$sold` query)
+- **Without** the gotcha about raw arrays, Claude might copy that pattern
+- **With** the gotcha, Claude should use Eloquent relationships and API Resources instead
 
-**Approximate time:** 4 minutes
+> "The gotchas section is where project-specific knowledge lives. Every line you add prevents a class of mistakes from recurring — in Claude's output and in code reviews."
 
----
+## Demo 3 — Permissions: Eliminating Prompt Fatigue
 
-## Demo 7 — Hook: Auto-Test After Edits
+Permission rules let safe commands run without interruption while keeping guardrails on dangerous ones.
 
-**What we show:** Hooks can run tests automatically after Claude edits specific types of files — creating a tight feedback loop where Claude knows immediately if it broke something.
+### Step 1 — Showing the problem
 
-**The BidBoard scenario:** Claude edits the `Bid` model or the `BidController`. The hook detects the file path and runs the relevant PHPUnit test file automatically. If the test fails, Claude sees the failure output and can self-correct before you even review the change.
+In a Claude session:
 
-**Key moments:**
+```
+Run the test suite and tell me which tests pass and which fail.
+```
 
-- Add a PostToolUse hook that:
-  - Matches `Write|Edit`
-  - Checks if the edited file is a model or controller
-  - Runs the corresponding PHPUnit test
-- Ask Claude to "Add a scope to the Bid model that returns only bids above a given amount"
-- Claude writes the scope, the hook fires, the relevant test runs
-- If the test passes: Claude proceeds confidently. If it fails: Claude sees the output and fixes the issue immediately
-- Point out the feedback loop: Claude does not need you to tell it something broke. The hook gives it the signal automatically. This is the beginning of a self-correcting workflow
+Claude will show you the permission prompt. Every time Claude needs to run a command, it asks you. For a test run, that's fine — once. But in a real session, Claude might need to run tests ten times while fixing code. That's ten prompts you have to approve."
 
-**Approximate time:** 5 minutes
+Count the prompts out loud. There will be at least one for `php artisan test`.
 
----
+### Step 2 — Create permissions
 
-## Demo 8 — MCP: GitHub
+Exit Claude. Create the settings file:
 
-**What we show:** MCP (Model Context Protocol) servers connect Claude to external tools. The GitHub MCP lets Claude read issues, PRs, and comments directly — no browser switching, no copy-pasting ticket descriptions into prompts.
+```bash
+mkdir -p .claude
+```
 
-**The BidBoard scenario:** BidBoard's GitHub repo has open issues — bug reports, feature requests, questions from users. Instead of reading them in the browser and summarizing for Claude, Claude reads them directly.
+Create `.claude/settings.json`:
 
-**Key moments:**
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose exec app php artisan test*)",
+      "Bash(docker compose exec app php artisan *)",
+      "Bash(docker compose exec app ./vendor/bin/pint*)",
+      "Bash(docker compose exec app ./vendor/bin/phpstan*)",
+      "Bash(docker compose exec app composer *)",
+      "Bash(docker compose logs*)",
+      "Bash(docker compose ps*)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(docker compose down*)",
+      "Bash(git push --force*)"
+    ]
+  }
+}
+```
 
-- Show the MCP setup: `claude mcp add github -- npx @modelcontextprotocol/server-github`
-- Prompt: "Look at the open issues in this repo. Find any bug reports and summarize them."
-- Claude reads the issues directly from GitHub, returns summaries with issue numbers, labels, and key details from the issue body
-- Follow-up prompt: "Pick the highest-priority bug and give me a plan for fixing it." — Claude pulls context from the issue description, comments, and any linked files to produce a specific plan
-- Point out: the context flows from issue tracker to implementation plan without any human copy-paste step. The issue becomes the spec
+The `*` at the end is to make sure commands that accept parameters or piping will also be allowed
 
-**Approximate time:** 4 minutes
+### Step 3 — Run the same prompt again
 
----
+```bash
+claude
+```
 
-## Demo 9 — MCP: Context7
+```
+Run the test suite and tell me which tests pass and which fail.
+```
 
-**What we show:** Context7 gives Claude access to up-to-date library documentation. Instead of relying on training data (which may be outdated), Claude can look up current docs for Laravel, Filament, and other dependencies.
+**What you will notice:**
 
-**The BidBoard scenario:** BidBoard uses Filament for its admin panel. Attendees need to add a relation manager to the Category resource (to manage items within a category). Filament's API for relation managers has specific conventions that Claude's training data might not cover precisely.
+- Zero permission prompts for `php artisan test`
+- Claude runs the tests immediately and reports results
+- The deny list means `rm -rf` and `docker compose down` still require explicit approval
 
-**Key moments:**
+> "You haven't reduced safety. You've defined what safe means for *this* project. And because `.claude/settings.json` is committed to git, the next developer who clones the repo gets the same setup on day one."
 
-- Show the MCP setup: `claude mcp add context7 -- npx @anthropic/context7-mcp`
-- Prompt: "I need to add a relation manager to the Filament Category resource so I can manage items from within the category edit page. Look up the current Filament docs for relation managers."
-- Claude fetches the current Filament documentation, finds the relation manager section, and produces code that matches the current API — not a hallucinated version from older training data
-- Another example: "Look up Laravel's pessimistic locking docs — I need to lock a row when placing a bid to prevent race conditions"
-- Point out: this is particularly valuable for fast-moving libraries like Filament where the API changes between major versions. Claude checks the docs instead of guessing
+## Demo 4 — Hook: Auto-Format on Every Write
 
-**Approximate time:** 4 minutes
+A PostToolUse hook runs Laravel Pint automatically after every file Claude writes, so code is always formatted before you see it.
 
----
+### Step 1 — Show the problem (before the hook)
 
-## Demo 10 — MCP: DevTools (Browser)
+Open a new claude session (or type `/clear` to reset the current one.
 
-**What we show:** A browser MCP (such as Playwright) lets Claude open a real browser, navigate to your app, and verify that what it built actually works visually — not just that the code compiles.
+```
+Add a helper method to the Item model called `formattedPrice()` that returns
+the current_price formatted as a dollar string like "$145.00".
+```
 
-**The BidBoard scenario:** BidBoard runs on `localhost:8000`. After making changes, Claude can open the auction listing page in a real browser, take a screenshot, and verify the layout, data display, and formatting are correct.
+After Claude writes the code, exit the session and run Pint:
 
-**Key moments:**
+```bash
+docker compose exec app ./vendor/bin/pint --test
+```
 
-- Show the MCP setup for a browser tool (Playwright MCP or similar)
-- Prompt: "Open BidBoard at localhost:8000 and verify the auction listing page displays correctly. Check that item prices show as formatted currency, not raw cents."
-- Claude opens the browser, navigates to the page, captures what it sees, and reports back: "The listing page loads. Items display with images, titles, and prices. Prices show correctly as $12.50 format."
-- Follow-up: "Now check the admin panel at localhost:8000/admin — verify the dashboard loads and shows the category count"
-- Point out: this closes the verification loop. Claude can now write code, run tests, AND check the browser. The three-layer verification (tests pass, linter passes, browser looks right) is the foundation for the Verify phase later
+> "Pint should have found formatting issues. The code is correct, but there are minor inconsistencies — an extra space, a missing blank line. On a team, these show up in every PR as noise."
 
-**Approximate time:** 5 minutes
+Undo the change before moving on. You can do this in 3 ways:
 
----
+```bash
+git checkout backend/app/Models/Item.php
+```
 
-## Phase 1 Wrap-Up
+Tell claude to undo the change:
 
-**Time check:** ~45 minutes total
+```
+Revert the last change
+```
 
-**The arc to reinforce:** In 45 minutes, we went from "Claude knows nothing about this project" to a fully configured environment where:
+Or use the `/rewind` command
 
-- Claude knows the stack, conventions, and domain rules (CLAUDE.md)
-- Claude remembers patterns across sessions (auto-memory)
-- Safe commands run without friction (permissions)
-- Code is auto-formatted on every write (PostToolUse hook)
-- Destructive commands are blocked before they execute (PreToolUse hook)
-- Tests run automatically after edits (PostToolUse hook)
-- Claude can read GitHub issues, look up current docs, and verify work in a real browser (MCP servers)
+### Step 2 — Add the hook
+
+Exit claude using `/exit`.
+
+Edit `.claude/settings.json` to add hooks:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose exec app php artisan test*)",
+      "Bash(docker compose exec app php artisan *)",
+      "Bash(docker compose exec app ./vendor/bin/pint*)",
+      "Bash(docker compose exec app ./vendor/bin/phpstan*)",
+      "Bash(docker compose exec app composer *)",
+      "Bash(docker compose logs*)",
+      "Bash(docker compose ps*)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(docker compose down*)",
+      "Bash(git push --force*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "docker compose exec app ./vendor/bin/pint 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
-**Transition to Phase 2:** "Claude now knows BidBoard as well as any new team member. Better, actually — because it will read the CLAUDE.md every single time, which is more than most humans do with onboarding docs. Now the question is: what kind of work do you hand it? That's Phase 2 — Classify."
+We run Pint on the full codebase rather than just dirty files (`--dirty`) because git may not be available inside the container.
+
+**Note:** Claude's UI displays file edits as "Update" but the internal tool name for hook matchers is `Edit` (and `Write` for new files). Use `/hooks` → PostToolUse to verify your matchers are registered. Also note that PostToolUse hooks with exit code 0 run **silently** — output is only visible in transcript mode (ctrl+o). This is intentional: the formatter should run without interrupting the flow.
+
+### Step 3 — Run the same prompt (with the hook)
+
+Open a new claude session and type:
+
+```
+Add a helper method to the Item model called `formattedPrice()` that returns
+the current_price formatted as a dollar string like "$145.00".
+```
+
+After Claude writes the code, exit the session and run Pint again:
+
+```bash
+docker compose exec app ./vendor/bin/pint --test
+```
+
+**What you will see:**
+
+- Pint reports zero issues — the hook already formatted the code
+- The hook runs silently (exit code 0 output is transcript-only) — it doesn't interrupt the flow
+- `|| true` means the hook never blocks Claude — if Pint encounters a syntax error, Claude continues
+
+**Same prompt. Same code. But now the file is perfectly formatted before you even look at it. Zero human effort. Zero PR comments about formatting. One hook eliminates an entire category of friction.**
+
+## Demo 5 — Hook: Block Dangerous Commands
+
+A PreToolUse hook intercepts destructive commands *before* they execute.
+
+### Step 1 — Add the hook
+
+Update `.claude/settings.json` to add a PreToolUse hook:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if grep -qE 'migrate:fresh|db:wipe'; then echo 'BLOCKED: migrate:fresh and db:wipe destroy all data. Use migrate (without :fresh) for safe migrations, or ask the user explicitly if a full reset is intended.' >&2; exit 2; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "docker compose exec app ./vendor/bin/pint 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The block message goes to **stderr** (`>&2`) so Claude receives it. Exit code **2** tells Claude to block the tool call — other non-zero codes are treated as hook errors but don't block execution.
+
+### Step 2 — Trigger the block
+
+```bash
+claude
+```
+
+```
+The database seems out of date. Can you reset it and start fresh?
+```
+
+**What to narrate:**
+
+> "Watch what Claude does. It will try to run `php artisan migrate:fresh`. The hook fires..."
+
+**What you will notice:**
+
+- Claude attempts the command — the hook intercepts it
+- Claude receives the block message and surfaces it to you
+- It doesn't silently fail. It reads the message and suggests alternatives
+- The block message is crafted to be useful to Claude: it explains *why* the command was blocked and *what to do instead*. If claude asks you for permission, this is tricky... no matter how many toimes you approve, the fresh command will not be executed.
+
+"Write hooks that explain the *why*. Claude reads the block message and can reason about it. 'BLOCKED: too dangerous' is less useful than 'BLOCKED: use migrate instead of migrate:fresh.'"
+
+## Demo 6 — MCP: GitHub Issues (demo only)
+
+The GitHub MCP lets Claude read issues and PRs directly — no browser switching, no copy-pasting ticket descriptions.
+
+### Setup
+
+```bash
+# Install the GitHub MCP server
+# Note: MCP servers run via npx — Node.js is required even in a PHP project
+claude mcp add github -- npx -y @modelcontextprotocol/server-github
+
+# Set your GitHub token (needs repo read access)
+export GITHUB_TOKEN=your_token_here
+```
+
+### Step 1 — Read the issues
+
+```bash
+claude
+```
+
+```
+Look at the open issues in the SkillTilt/dpc26-getting-started-with-claude-workshop repo.
+Summarize each one briefly.
+```
+
+**What to narrate:**
+
+> "Claude is reading GitHub directly. No browser, no copy-paste. It sees the title, labels, body, and comments for each issue."
+
+**Expected output:** Claude summarizes the 5 planted issues (also available locally in `working/todo/bugs/`):
+1. Category page slow loading — N+1 query (`working/todo/bugs/category-page-slow-loading.md`)
+2. Concurrent bids race condition (`working/todo/bugs/concurrent-bids-race-condition.md`)
+3. Countdown shows wrong time — timezone bug (`working/todo/bugs/countdown-shows-wrong-time.md`)
+4. Bid validation off-by-one — bid comparison (`working/todo/bugs/bid-validation-off-by-one.md`)
+5. Bid test fails due to missing user (`working/todo/bugs/bid-test-fails-missing-user.md`)
+
+### Step 2 — Pick an issue and plan
+
+```
+Pick the timezone bug issue and give me a quick analysis:
+what's causing it and what would the fix look like?
+```
+
+**What you notice:**
+
+- Claude pulls context from the issue body (the reproduction steps mentioning UTC offset)
+- It can cross-reference with the actual codebase (`CountdownTimer.vue`)
+- The issue description flows into the analysis without any human copy-paste
+
+> "The context goes from issue tracker to implementation plan in one step. The issue *becomes* the spec."
+
+## Demo 7 — MCP: Playwright (Browser Verification)
+
+A browser MCP lets Claude open the app, see what users see, and verify changes visually — not just that code compiles.
+
+### Setup
+
+```bash
+claude mcp add playwright -- npx -y @playwright/mcp@latest
+```
+
+### Step 1 — Smoke test
+
+```bash
+claude
+```
+
+```
+Open a browser and navigate to http://localhost:3000.
+Take a screenshot and describe what you see.
+```
+
+**What you will see:**
+
+- Claude opens a real browser, navigates to the BidBoard homepage
+- It sees the category grid with images and descriptions
+- It can describe the layout, verify data is present, and spot visual issues
+
+### Step 2 — Check specific page
+
+```
+Navigate to the Electronics category and verify the items are displaying correctly
+with prices and countdown timers.
+```
+
+Claude can now see what users see. This closes the verification loop: code works, tests pass, and the browser looks right. We'll use this heavily in Phase 5 — Verify.
+
+### Step 3 — Check admin panel
+
+```
+Navigate to http://localhost:80/admin and log in with alice@example.com / password.
+Describe what the admin dashboard looks like.
+```
+
+This is setup. We install it now in Configure so it's ready when we need it. You don't want to be installing MCPs in the middle of debugging a production issue.
