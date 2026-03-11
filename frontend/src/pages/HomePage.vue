@@ -1,0 +1,51 @@
+<script setup>
+import { onMounted } from 'vue'
+import { useCategories } from '../composables/useCategories'
+import CategoryCard from '../components/CategoryCard.vue'
+
+const { categories, fetchCategories, loading } = useCategories()
+
+onMounted(() => {
+    fetchCategories()
+})
+</script>
+
+<template>
+    <div class="min-h-screen bg-gray-50">
+        <!-- Hero Section -->
+        <section class="bg-indigo-600 text-white py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+                    BidBoard
+                </h1>
+                <p class="mt-4 text-xl text-indigo-200 max-w-2xl mx-auto">
+                    Find great deals on unique items
+                </p>
+            </div>
+        </section>
+
+        <!-- Categories Grid -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8">Browse Categories</h2>
+
+            <div v-if="loading" class="flex justify-center py-12">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+            </div>
+
+            <div
+                v-else
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+            >
+                <CategoryCard
+                    v-for="category in categories"
+                    :key="category.id"
+                    :category="category"
+                />
+            </div>
+
+            <p v-if="!loading && categories.length === 0" class="text-center text-gray-500 py-12">
+                No categories found.
+            </p>
+        </section>
+    </div>
+</template>
