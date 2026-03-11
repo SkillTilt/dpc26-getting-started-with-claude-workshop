@@ -15,7 +15,8 @@ class OutbidNotification extends Notification implements ShouldQueue
 
     public function __construct(
         public Bid $bid,
-    ) {}
+    ) {
+    }
 
     public function via(object $notifiable): array
     {
@@ -27,7 +28,7 @@ class OutbidNotification extends Notification implements ShouldQueue
         $item = $this->bid->item;
         $amount = number_format($this->bid->amount, 2);
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject("You've been outbid on {$item->title}")
             ->view('emails.outbid', [
                 'itemTitle' => $item->title,

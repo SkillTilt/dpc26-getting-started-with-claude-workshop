@@ -10,10 +10,13 @@ use Illuminate\Queue\SerializesModels;
 
 class BidPlaced
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     public function __construct(
         public Bid $bid,
         public ?User $previousBidder = null,
-    ) {}
+    ) {
+    }
 }
