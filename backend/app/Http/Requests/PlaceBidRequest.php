@@ -43,7 +43,7 @@ class PlaceBidRequest extends FormRequest
                 $validator->errors()->add('item', 'This auction is no longer active.');
             }
 
-            if ($item->ends_at < now()) {
+            if ($item->ends_at <= now()) {
                 $validator->errors()->add('item', 'This auction has already ended.');
             }
         });
@@ -69,6 +69,6 @@ class PlaceBidRequest extends FormRequest
      */
     protected function failedAuthorization(): void
     {
-        throw new \Illuminate\Auth\Access\AuthorizationException('You cannot bid on your own item.');
+        throw new \Illuminate\Auth\Access\AuthorizationException('You cannot bid on your own listing.');
     }
 }
