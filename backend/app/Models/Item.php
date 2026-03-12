@@ -122,6 +122,14 @@ class Item extends Model
     }
 
     /**
+     * Get the 5 most recent bids for this item.
+     */
+    public function recentBids(): HasMany
+    {
+        return $this->bids()->latest()->limit(5);
+    }
+
+    /**
      * Determine if the item's auction has ended.
      */
     public function getIsEndedAttribute(): bool
