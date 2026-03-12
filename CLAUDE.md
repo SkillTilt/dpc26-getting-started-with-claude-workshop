@@ -76,6 +76,7 @@ Five tables: users, categories, items (with seller_id, winner_id, status enum), 
 - An auction can be active, closed, or cancelled — status transitions are one-way
 - Only the seller can cancel an auction; the system closes auctions when they expire
 - A user cannot bid on their own item
+- A bid must be strictly greater than the current price — reject bids where amount <= current_price. Equal bids are not valid.
 
 ## Testing
 
