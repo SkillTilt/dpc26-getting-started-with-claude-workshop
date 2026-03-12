@@ -2,8 +2,6 @@
 
 Welcome to the **Getting Started with Claude Code** workshop. You'll inherit BidBoard — a Laravel auction platform with intentional bugs and code quality issues — and learn to work with Claude Code through 7 phases.
 
----
-
 ## Prerequisites
 
 Before the workshop starts, make sure you have:
@@ -16,7 +14,13 @@ Before the workshop starts, make sure you have:
 
 > **See [SETUP.md](SETUP.md) for full installation instructions, step-by-step setup, and troubleshooting.**
 
----
+## Claude code introduction
+
+This workshop expects a minimal understanding from claude code. If this is the very first time you use claude, you might want to follow this page in the claude documentation first instead. It will help you set up claude code and it will give you a brief introduction.
+
+> See [https://code.claude.com/docs/en/quickstart](https://code.claude.com/docs/en/quickstart)
+
+As a reminder: to use claude code, you will either need a paid claude subscription (pro, max, teams) or an api account with credits. See the link above for more info.
 
 ## Workshop Flow
 
@@ -70,8 +74,6 @@ git stash pop   # optional: apply your changes on top
 ### If you fall behind
 
 No problem. Check out the next phase branch and you'll have a clean starting point with all previous phases complete. The branches are designed so you can jump in at any phase.
-
----
 
 ## Quick Reference
 
