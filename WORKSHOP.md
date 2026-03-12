@@ -14,13 +14,13 @@ Before the workshop starts, make sure you have:
 
 > **See [SETUP.md](SETUP.md) for full installation instructions, step-by-step setup, and troubleshooting.**
 
-## Claude code introduction
+## New to Claude Code?
 
-This workshop expects a minimal understanding from claude code. If this is the very first time you use claude, you might want to follow this page in the claude documentation first instead. It will help you set up claude code and it will give you a brief introduction.
+If you've never used it before, work through the official quickstart first. It covers installation and basic usage — the workshop picks up where that leaves off.
 
 > See [https://code.claude.com/docs/en/quickstart](https://code.claude.com/docs/en/quickstart)
 
-As a reminder: to use claude code, you will either need a paid claude subscription (pro, max, teams) or an api account with credits. See the link above for more info.
+As a reminder: to use claude code, you will either need a paid claude subscription (pro, max, teams) or an api account with credits. See [SETUP.md](SETUP.md) or the link above for more info.
 
 ## Workshop Flow
 
