@@ -174,6 +174,8 @@ This starts three containers:
 ### Set up the database
 
 ```bash
+cp backend/.env.example backend/.env
+docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
 ```
 
