@@ -12,8 +12,6 @@ You need:
 - **Git** (any recent version)
 - A **terminal** you're comfortable with (Terminal.app, iTerm2, Windows Terminal, etc.)
 
----
-
 ## 1. Install Claude Code
 
 Full docs: [code.claude.com/docs/en/quickstart](https://code.claude.com/docs/en/quickstart)
@@ -52,8 +50,6 @@ curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del in
 winget install Anthropic.ClaudeCode
 ```
 
----
-
 ## 2. Log in
 
 Start Claude Code and follow the login prompt:
@@ -65,8 +61,6 @@ claude
 You'll be asked to authenticate in your browser. Once done, your credentials are stored locally — you won't need to log in again.
 
 If you need to switch accounts later, use `/login` inside a session.
-
----
 
 ## 3. Install Docker
 
@@ -82,16 +76,6 @@ docker compose version
 # Should show v2.x+
 ```
 
-**Pre-pull images** (optional, saves build time):
-
-```bash
-docker pull php:8.4-cli
-docker pull mysql:8.0
-docker pull node:20-slim
-```
-
----
-
 ## 4. Install Chromium (for Playwright MCP)
 
 During the workshop we use the Playwright MCP server to let Claude browse the running app and take screenshots. This requires a Chromium browser:
@@ -103,8 +87,6 @@ npx playwright install chromium
 This downloads a standalone Chromium binary (~150 MB). It does **not** affect your system browsers.
 
 > On Windows, run this in PowerShell or WSL. If behind a corporate proxy or firewall, set `HTTPS_PROXY` before running this command.
-
----
 
 ## 5. Create a GitHub Personal Access Token
 
@@ -139,8 +121,6 @@ set GITHUB_TOKEN=github_pat_your_token_here
 
 > **Tip:** Add this to your shell profile (`~/.zshrc`, `~/.bashrc`, or PowerShell `$PROFILE`) so it persists across terminal sessions.
 
----
-
 ## 6. Verify everything works
 
 Run these checks:
@@ -163,8 +143,6 @@ echo $GITHUB_TOKEN
 ```
 
 If all five succeed, you're ready to start the application.
-
----
 
 ## 7. Start the Application
 
@@ -218,8 +196,6 @@ All passwords are `password`.
 | Clara Voss | clara@example.com | Seller |
 | Dave Park | dave@example.com | Seller |
 | Eve Santos | eve@example.com | Buyer |
-
----
 
 ## Troubleshooting
 
