@@ -4,165 +4,17 @@ Welcome to the **Getting Started with Claude Code** workshop. You'll inherit Bid
 
 ---
 
-## Prerequisites Setup
+## Prerequisites
 
-Complete these steps **before** the workshop. The entire setup takes about 10–15 minutes.
+Before the workshop starts, make sure you have:
 
-### 1. Install Claude Code
+- [ ] **Claude Code** installed and logged in
+- [ ] **Docker** installed and running
+- [ ] **Chromium** installed for Playwright MCP
+- [ ] **GitHub Personal Access Token** configured
+- [ ] **BidBoard app** running (`docker compose up -d` + migrations seeded)
 
-You need a **Claude subscription** (Pro, Max, Teams, or Enterprise) — [claude.com/pricing](https://claude.com/pricing)
-
-Full docs: [code.claude.com/docs/en/quickstart](https://code.claude.com/docs/en/quickstart)
-
-**macOS / Linux / WSL (recommended):**
-```bash
-curl -fsSL https://claude.ai/install.sh | bash
-```
-
-**macOS with Homebrew:**
-```bash
-brew install --cask claude-code
-```
-
-**Windows PowerShell:**
-```powershell
-irm https://claude.ai/install.ps1 | iex
-```
-
-**Windows CMD:**
-```batch
-curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd
-```
-
-**Windows WinGet:**
-```powershell
-winget install Anthropic.ClaudeCode
-```
-
-> **Windows requires [Git for Windows](https://git-scm.com/downloads/win).** Install it first if you don't have it.
-
-After installing, log in:
-
-```bash
-claude
-# Follow the browser prompt to authenticate
-```
-
-Your credentials are stored locally — you won't need to log in again.
-
-### 2. Install Docker
-
-The demo app runs in Docker Compose with three containers: PHP backend, Vue frontend, and MySQL 8.0.
-
-- **macOS / Windows:** Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- **Linux:** Install [Docker Engine](https://docs.docker.com/engine/install/) + [Docker Compose plugin](https://docs.docker.com/compose/install/linux/)
-
-Verify:
-```bash
-docker compose version
-# Should show v2.x+
-```
-
-**Pre-pull images** (optional, saves time during the workshop):
-```bash
-docker pull php:8.4-cli
-docker pull mysql:8.0
-docker pull node:20-alpine
-```
-
-### 3. Install Chromium (for Playwright MCP)
-
-During the workshop, Claude uses a browser to verify changes visually. This requires a standalone Chromium:
-
-```bash
-npx playwright install chromium
-```
-
-This downloads ~150 MB. It does **not** affect your system browsers.
-
-> On Windows, run this in PowerShell or WSL. If behind a proxy, set `HTTPS_PROXY` first.
-
-### 4. Create a GitHub Personal Access Token
-
-The workshop uses the GitHub MCP server so Claude can read issues directly from the repository. This requires a token.
-
-1. Go to [github.com/settings/tokens](https://github.com/settings/tokens?type=beta) (Fine-grained tokens)
-2. Click **Generate new token**
-3. Give it a name (e.g., `claude-workshop`)
-4. Under **Repository access**, select **Only select repositories** and pick this workshop repo
-5. Under **Permissions → Repository permissions**, grant:
-   - **Issues**: Read-only
-   - **Pull requests**: Read-only
-   - **Contents**: Read-only
-6. Click **Generate token** and copy the value
-
-Set it in your terminal before starting Claude:
-
-```bash
-export GITHUB_TOKEN=github_pat_your_token_here
-```
-
-> **Tip:** Add this to your shell profile (`~/.zshrc`, `~/.bashrc`) so it persists across terminal sessions.
-
-### 5. Verify everything
-
-```bash
-# Claude Code installed?
-claude --version
-
-# Docker running?
-docker compose version
-
-# Chromium installed?
-npx playwright install --dry-run chromium
-
-# GitHub token set?
-echo $GITHUB_TOKEN
-```
-
----
-
-## Starting the Application
-
-### Clone and start
-
-```bash
-git clone git@github.com:SkillTilt/dpc26-getting-started-with-claude-workshop.git
-cd dpc26-getting-started-with-claude-workshop
-docker compose build
-docker compose up -d
-```
-
-This starts three containers:
-- **app** — Laravel backend on [http://localhost:80](http://localhost:80)
-- **mysql** — MySQL 8.0 database (persistent volume)
-- **frontend** — Vue frontend on [http://localhost:3000](http://localhost:3000)
-
-### Set up the database
-
-```bash
-docker compose exec app php artisan migrate --seed
-```
-
-This runs all migrations and seeds: 5 users, 4 categories, 15 items with bids.
-
-### Verify it works
-
-- **Frontend:** [http://localhost:3000](http://localhost:3000) — BidBoard homepage with 4 categories
-- **Admin panel:** [http://localhost:80/admin](http://localhost:80/admin) — log in with `alice@example.com` / `password`
-- **API:** `curl http://localhost:80/api/categories` — returns JSON with 4 categories
-
-### Test accounts
-
-All passwords are `password`.
-
-| Name | Email | Role |
-|------|-------|------|
-| Alice Mercer | alice@example.com | Seller |
-| Bob Tanaka | bob@example.com | Seller |
-| Clara Voss | clara@example.com | Seller |
-| Dave Park | dave@example.com | Seller |
-| Eve Santos | eve@example.com | Buyer |
+> **See [SETUP.md](SETUP.md) for full installation instructions, step-by-step setup, and troubleshooting.**
 
 ---
 
@@ -174,7 +26,7 @@ The workshop follows the **7-phase framework**:
 Configure → Classify → Plan → Execute → Verify → Commit → Compound
 ```
 
-Each phase has its own **git branch**. The branch contains:
+The workshop starts on the `phase-1-configure` branch. Each phase has its own **git branch** containing:
 - All changes from previous phases (cumulative)
 - The starting state for that phase's exercises
 
@@ -183,7 +35,7 @@ Each phase has its own **git branch**. The branch contains:
 | Branch | Phase | Starting state |
 |--------|-------|----------------|
 | `main` | — | Raw BidBoard app, no Claude configuration |
-| `phase-1-configure` | 1. Configure | Same as main — you build the configuration |
+| `phase-1-configure` | 1. Configure | Same as main — this is where you start |
 | `phase-2-classify` | 2. Classify | CLAUDE.md, permissions, hooks from Phase 1 |
 | `phase-3-plan` | 3. Plan | Phase 2 complete + `/design` slash command setup |
 | `phase-4-execute` | 4. Execute | Phase 3 complete + plans ready for execution |
@@ -223,7 +75,7 @@ No problem. Check out the next phase branch and you'll have a clean starting poi
 
 ## Quick Reference
 
-### Backend commands (run from project root)
+### Backend commands (run from the repo root, where `docker-compose.yml` lives)
 
 ```bash
 docker compose exec app php artisan test                    # Run tests
@@ -243,25 +95,13 @@ docker compose exec frontend npm run dev    # Dev server (auto-started)
 docker compose exec frontend npm run build  # Production build
 ```
 
-### Running tests
+### Docker lifecycle
 
 ```bash
-docker compose exec app php artisan test
+docker compose up -d       # Start all containers
+docker compose down        # Stop and remove containers
+docker compose restart     # Restart all containers
+docker compose logs -f     # Follow container logs
 ```
 
-Expected: 17 passing, 1 intentional failure (`BidTest` — references `User::find(1)` without seeding).
-
----
-
-## Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| `claude: command not found` | Close and reopen your terminal, or check `~/.claude/bin` is in your PATH |
-| Docker permission denied (Linux) | `sudo usermod -aG docker $USER`, then log out and back in |
-| Port 80 or 3000 in use | Stop the conflicting process or change ports in `docker-compose.yml` |
-| Frontend shows "No categories found" | Run `docker compose exec app php artisan migrate --seed` |
-| Chromium download fails | Set `PLAYWRIGHT_BROWSERS_PATH=0` and retry `npx playwright install chromium` |
-| `GITHUB_TOKEN` not working | Verify the token has Issues + Contents read access on this repo |
-| Windows: slow file system | Clone the repo inside WSL 2 (`cd ~` first), not on the Windows filesystem |
-| Corporate proxy blocks downloads | Set `HTTP_PROXY` and `HTTPS_PROXY` environment variables |
+> **Note:** Most tests pass out of the box. `BidTest` has one intentional failure (references `User::find(1)` without seeding). See [SETUP.md](SETUP.md) for test account credentials and troubleshooting.
