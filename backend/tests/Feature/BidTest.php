@@ -29,4 +29,45 @@ class BidTest extends TestCase
 
         $response->assertStatus(422);
     }
+
+    public function test_seller_cannot_bid_on_own_item()
+    {
+        $seller = User::factory()->create();
+
+        $item = Item::factory()->create([
+            'seller_id' => $seller->id,
+            'starting_price' => 100,
+            'current_price' => 100,
+            'status' => 'active',
+            'ends_at' => now()->addDays(1),
+        ]);
+
+        $response = $this->actingAs($seller)
+            ->postJson("/api/items/{$item->id}/bids", [
+                'amount' => 150,
+            ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_bid_on_ended_auction_is_rejected()
+    {
+        $seller = User::factory()->create();
+        $bidder = User::factory()->create();
+
+        $item = Item::factory()->create([
+            'seller_id' => $seller->id,
+            'starting_price' => 100,
+            'current_price' => 100,
+            'status' => 'active',
+            'ends_at' => now()->subHour(),
+        ]);
+
+        $response = $this->actingAs($bidder)
+            ->postJson("/api/items/{$item->id}/bids", [
+                'amount' => 150,
+            ]);
+
+        $response->assertStatus(422);
+    }
 }
