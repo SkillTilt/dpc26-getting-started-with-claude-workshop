@@ -34,13 +34,11 @@ class BidController extends Controller
         $item->current_price = $amount;
         $item->save();
 
-        // find the previous high bidder and dispatch the outbid event
+        // find the previous high bidder (needed for outbid notification)
         $previousHighBid = $item->bids()
             ->where('id', '!=', $bid->id)
             ->orderBy('amount', 'desc')
             ->first();
-
-        BidPlaced::dispatch($bid, $previousHighBid?->user);
 
         // snipe protection: extend auction if bid placed within last 30 seconds
         if ($item->ends_at->diffInSeconds(now(), false) >= -30) {
@@ -62,7 +60,7 @@ class BidController extends Controller
 
                 Log::info("Auction for item {$item->id} ({$item->title}) has been auto-closed. Winner: user {$winningBid->user_id}");
 
-                // return auction close result
+                // return auction close result — no outbid notification since auction is over
                 return response()->json([
                     'message' => 'Bid placed and auction closed!',
                     'winning_bid' => $winningBid->amount,
@@ -70,6 +68,9 @@ class BidController extends Controller
                 ]);
             }
         }
+
+        // Only notify the previous bidder if the auction is still active
+        BidPlaced::dispatch($bid, $previousHighBid?->user);
 
         // return the new bid
         return response()->json(new BidResource($bid), 201);
