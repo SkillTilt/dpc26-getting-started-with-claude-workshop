@@ -101,9 +101,9 @@ Without CLAUDE.md, Claude would guess. It might use `toFixed(2)` manually instea
 
 **Undo any changes Claude made** — this was a demonstration, not a feature we are shipping.
 
-## Demo 4 — The Reactive Loop: Bug to Fix in One Flow
+## Demo 3 — The Reactive Loop: Bug to Fix in One Flow
 
-(this was already fixed in previous demos, you can read this scenario as an example of how such a loop would work)
+(this was already fixed in previous phases, you can read this scenario as an example of how such a loop would work)
 
 The full reactive cycle — from bug report to committed fix — in one unbroken flow. Every phase is present. This is the bread and butter of daily work with Claude Code.
 
@@ -159,7 +159,7 @@ amount <= current_price. Equal bids are not valid."
 
 That was the full loop. Bug report to committed fix with a regression test and a permanent rule — in about five minutes. Every phase contributed. This is the rhythm you develop with practice.
 
-## Demo 5 — Proactive Suggestions: Claude Notices Things
+## Demo 4 — Proactive Suggestions: Claude Notices Things
 
 While working on one task, Claude notices an unrelated issue and raises it. This is Claude acting as a code reviewer, not just a code writer. This is the proactive compounding loop.
 
@@ -212,7 +212,7 @@ The proactive loop requires a habit: before you close any session, spend ninety 
 
 **Undo the `watchedItems` changes** — the watchlist table does not actually exist.
 
-## Demo 6 — Architecture Review: Thinking, Not Coding
+## Demo 5 — Architecture Review: Thinking, Not Coding
 
 Claude as an architecture advisor. Not writing code — analyzing systems. This is high-leverage Claude usage: getting a second opinion from someone who has read the entire codebase.
 
@@ -243,7 +243,7 @@ No code is being written here. Claude is reading the codebase and thinking about
 
 Claude's value is not limited to writing code. This architecture review would feed into weeks of Phase 4 work. Each improvement planned and executed through the full loop. And the review itself? It took one prompt and two minutes.
 
-## Demo 7 — Error Hierarchy: Systematic Consistency
+## Demo 6 — Error Hierarchy: Systematic Consistency
 
 Creating consistent error handling across the bidding domain. This is cross-cutting work that Claude handles well because it holds all the files in context simultaneously.
 
@@ -293,7 +293,7 @@ Commit this with the message:
 
 This is systematic, multi-file consistency work — Claude's sweet spot. Four exception classes, updated controller logic, updated exception handler, updated tests. Tedious for a human. Trivial for an agent that holds all the files in context. And the error hierarchy itself is a form of compounding — investing in structure now so that every future bidding feature gets clean error handling for free.
 
-## Demo 8 — Prototype Feature: Speed Over Polish
+## Demo 7 — Prototype Feature: Speed Over Polish
 
 Claude's speed for exploratory work. When you are not sure if a feature is worth building, Claude can produce a working prototype fast enough to evaluate the idea instead of debating it.
 
@@ -336,7 +336,7 @@ Let me be explicit about what this prototype does NOT have: no real-time updates
 
 - From prompt to working feature in minutes
 - Claude followed CLAUDE.md conventions even in prototype mode — Form Requests, API Resources, Composition API
-- The unique constraint on `[user_id, item_id]` prevents duplicate watchlist entries (Claude may even reference the kind of issue we discussed in Demo 55)
+- The unique constraint on `[user_id, item_id]` prevents duplicate watchlist entries
 - The prototype is not production-ready, and that is the point. Five minutes to learn whether the feature is worth five days
 
 This is Phase 2 judgment applied to the quality bar. Prototypes validate ideas, not implementations. You spent five minutes to learn whether this feature is worth building properly. That is the highest-leverage use of Claude's speed.
@@ -348,7 +348,7 @@ Undo all the watchlist changes — remove the migration, model, controller,
 routes, and Vue page. Revert everything to the state before we started.
 ```
 
-## Demo 9 — Full Workflow: The Grand Finale
+## Demo 8 — Full Workflow: The Grand Finale
 
 The complete workflow — every phase, one continuous flow, driven by a real-world bug report. This is the capstone. Everything the audience learned today, in action.
 
@@ -379,7 +379,7 @@ This is the grand finale. Every phase in one flow. Watch Claude classify the pro
 
 **What to watch for:**
 
-- Claude reads the bid flow in `BidController.php` (or `BiddingService.php` if we kept Demo 56's refactor):
+- Claude reads the bid flow in `BidController.php` (or `BiddingService.php` if we kept earlier refactors):
   - Bid is placed
   - `current_price` is updated
   - Previous high bidder is identified (lines 82-90)
@@ -456,7 +456,7 @@ That was every phase. Not a checklist we followed mechanically, but a rhythm. Cl
 cat CLAUDE.md
 ```
 
-Look at this file now. Compare it to what we started with in Phase 1. Every demo added something. The package hallucination rule (Demo 51). The bid comparison rule (Demo 54). The UserController tech debt note (Demo 55). The notification ordering gotcha (Demo 60). This file is no longer the onboarding document we wrote in Phase 1. It is the accumulated knowledge of every session we ran today.
+Look at this file now. Compare it to what we started with in Phase 1. Every demo added something. The package hallucination rule. The bid comparison rule. The UserController tech debt note. The notification ordering gotcha. This file is no longer the onboarding document we wrote in Phase 1. It is the accumulated knowledge of every session we ran today.
 
 **The two loops:**
 
