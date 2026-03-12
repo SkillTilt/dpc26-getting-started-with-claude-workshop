@@ -14,24 +14,16 @@ const bidAmount = ref('')
 const error = ref('')
 const loading = ref(false)
 
-// BAD CODE 3: Client-side validation that DIFFERS from server
 const validateBid = () => {
   const amount = parseFloat(bidAmount.value)
   if (isNaN(amount)) {
     error.value = 'Please enter a valid amount'
     return false
   }
-  // Uses <= but server uses < (Bug 4) — MISMATCH
   if (amount <= props.currentPrice) {
     error.value = 'Your bid must be higher than the current price'
     return false
   }
-  // Client enforces a max increment that the server DOESN'T:
-  if (amount > props.currentPrice * 2) {
-    error.value = 'Bid cannot be more than double the current price'
-    return false
-  }
-  // Client DOESN'T check if auction is still active (server does)
   return true
 }
 
@@ -47,7 +39,8 @@ const submitBid = async () => {
     bidAmount.value = ''
     emit('bid-placed')
   } catch (e) {
-    error.value = e.response?.data?.error || 'Failed to place bid'
+    const data = e.response?.data
+    error.value = data?.message || data?.error || 'Failed to place bid'
   } finally {
     loading.value = false
   }
@@ -69,7 +62,7 @@ const submitBid = async () => {
         type="number"
         step="0.01"
         min="0"
-        :placeholder="`Min $${(props.currentPrice + 0.01).toFixed(2)}`"
+        :placeholder="`More than $${props.currentPrice.toFixed(2)}`"
         class="block w-full rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm"
         :disabled="loading"
       />

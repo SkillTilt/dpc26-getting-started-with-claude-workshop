@@ -24,7 +24,7 @@ class PlaceBidRequest extends FormRequest
     public function rules(): array
     {
         $item = $this->route('item');
-        $minBid = $item->current_price + 1.00;
+        $minBid = $item->current_price + 0.01;
 
         return [
             'amount' => ['required', 'numeric', 'min:' . $minBid],
@@ -57,10 +57,8 @@ class PlaceBidRequest extends FormRequest
     public function messages(): array
     {
         $item = $this->route('item');
-        $minBid = $item->current_price + 1.00;
-
         return [
-            'amount.min' => 'Bid must be at least $' . number_format($minBid, 2) . '.',
+            'amount.min' => 'Bid must be greater than the current price of $' . number_format((float) $item->current_price, 2) . '.',
         ];
     }
 
